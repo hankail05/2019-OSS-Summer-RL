@@ -27,16 +27,34 @@ class Agent:
         # self.discount_factor와 self.q_table을 이용하세요.
 
         # 구현을 완료했다면 아래 pass는 지우셔도 됩니다.
-        pass
+        self.q_table[state][action] += 0.01 * (reward +
+                                               self.discount_factor * self.q_table[next_state][next_action] -
+                                               self.q_table[state][action])
 
     # 입실론 탐욕 정책에 따라서 행동을 반환하는 메소드입니다.
     def get_action(self, state):
         # TODO: ε-탐욕 정책 코드를 작성
         # self.epsilon을 이용하세요.
 
-        action = np.random.choice(self.actions)
+        if np.random.normal() >= self.epsilon:
+            return int(np.random.choice(self.max_list(self.q_table[state])))
+        else:
+            return int(np.random.choice(self.actions))
 
-        return int(action)
+    def max_list(self, actions):
+        lst = []
+        max_idx = 0
+        max_val = actions[0]
+        for idx, x in enumerate(actions):
+            if max_val < x:
+                lst.clear()
+                max_val = x
+                max_idx = idx
+                lst.append(idx)
+            elif max_val == x:
+                lst.append(idx)
+        return lst
+
 
 # 범위 밖으로 나간 state를 다시 maze안으로 넣어주는 코드
 def state_to_bucket(state):
