@@ -23,13 +23,13 @@ class DQNAgent:
         '''
         구글 colab에서는 아래 render를 True로 만들면 실행이 안됩니다.
         '''
-        self.render = False
+        self.render = True
 
         '''
         저장해 놓은 신경망 모델을 가져올 지 선택합니다. (lunarlander_trainded.h5)
         훈련을 중간에 중단해 놓았다가 다시 시작하려면 아래를 True로 바꾸고 실행하시면 됩니다.
         '''
-        self.load_model = False
+        self.load_model = True
 
         # 상태와 행동의 크기 정의
         self.state_size = state_size
@@ -41,9 +41,9 @@ class DQNAgent:
         아래 8개 하이퍼파라미터(maxlen 포함)는 cartpole_dqn 예제 그대로 복사하셔도 되고, 좀 수정하셔도 됩니다.
         '''
         self.discount_factor = 0.99
-        self.learning_rate = None
+        self.learning_rate = 0.001
         self.epsilon = 1.0
-        self.epsilon_decay = None
+        self.epsilon_decay = 0.999
         self.epsilon_min = 0.01
         self.batch_size = 64
         self.train_start = 10000
@@ -72,7 +72,16 @@ class DQNAgent:
         좀 수정하셔도 됩니다.
         수정하신 뒤에는 아래에 있는 pass를 지워주세요.
         '''
-        pass
+        model = Sequential()
+        model.add(Dense(24, input_dim=self.state_size, activation='relu',
+                        kernel_initializer='he_uniform'))
+        model.add(Dense(24, activation='relu',
+                        kernel_initializer='he_uniform'))
+        model.add(Dense(self.action_size, activation='linear',
+                        kernel_initializer='he_uniform'))
+        model.summary()
+        model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
+        return model
 
     # 타깃 모델을 모델의 가중치로 업데이트
     def update_target_model(self):
@@ -169,7 +178,7 @@ if __name__ == "__main__":
                 # 각 에피소드마다 타깃 모델을 모델의 가중치로 업데이트
                 agent.update_target_model()
 
-                # 100 에피소드마다 학습 결과 
+                # 100 에피소드마다 학습 결과
                 scores.append(score)
                 episodes.append(e)
                 pylab.plot(episodes, scores, 'b')
@@ -188,6 +197,6 @@ if __name__ == "__main__":
                     sys.exit()
 
         # 무작위 행동으로 리플레이 메모리를 어느 정도 채운 다음부터
-        # epsilon의 값을 epsilon_min 값까지 조금씩 줄여줍니다 
+        # epsilon의 값을 epsilon_min 값까지 조금씩 줄여줍니다
         if len(agent.memory) >= agent.train_start and agent.epsilon > agent.epsilon_min:
             agent.epsilon *= agent.epsilon_decay
